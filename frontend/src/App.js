@@ -1,77 +1,45 @@
-import React, {useEffect, useState, useRef} from 'react';
-import './App.css';
-
-let stompClient = null;
+import React, {useState, useMemo, useEffect} from 'react';
+import {Route, Routes,} from "react-router-dom";
+import RequireAuth from './RequireAuth';
+import Login from './Login';
+import Home from './Home';
+import {UserContext} from "./UserContext";
 
 function App() {
-  const [messages, setMessages] = useState([]);
-  const newMessage = useRef('');
-    const effectCalled = useRef(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [token, setToken] = useState(null);
+    const value = useMemo(
+        () => ({ currentUser, token, setCurrentUser, setToken }),
+        [currentUser, token]
+    );
 
-  const send = () => {
-      let msg = {text: newMessage.current.value};
-      newMessage.current.value = '';
-      fetch('http://localhost:8080/messages', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(msg)
-      })
-  };
-
-  useEffect(() => {
-      if (!effectCalled.current) {
-          fetch('http://localhost:8080/messages',{
-              method: 'GET',
-              headers: {
-                  accept: 'application/json',
-              },
-          }).then(response => response.json()).then(res => {
-              setMessages(res)
-          });
-          connect();
-          console.log('єффект')
-          effectCalled.current = true;
-      }
-  }, []);
-
-    const connect = () => {
-        const Stomp = require("stompjs");
-        let SockJS = require("sockjs-client");
-        SockJS = new SockJS("http://localhost:8080/ws");
-        stompClient = Stomp.over(SockJS);
-        stompClient.connect({}, onConnected, onError);
-    };
-
-    const onConnected = () => {
-        console.log("connected");
-        stompClient.subscribe(
-            "/topic/messages",
-            onMessageReceived
-        );
-    };
-
-    const onError = (err) => {
-        console.log(err);
-    };
-
-    const onMessageReceived = (msg) => {
-        console.log('получно')
-        let newMsg = JSON.parse(msg.body);
-        // console.log(newMsg)
-        setMessages( arr => [...arr, newMsg]);
-    };
-
+    useEffect(() => {
+        fetch('api/v1/users/current',{
+            method: 'GET',
+            headers: {
+                accept: 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+        }).then(res => {
+            res.json().then(res => {
+                setCurrentUser(res)
+            })
+        })
+    }, [token]);
 
   return (
-    <div className="App">
-        <input type="text" ref={newMessage}/>
-        <button onClick={send}>send</button>
-        <ul>
-            {messages.map(message => <li key={message.id}>{message.text}</li>)}
-        </ul>
-    </div>
+      <UserContext.Provider value={value}>
+          <Routes>
+              <Route path="/login" element={<Login/>}/>
+              <Route path="/"
+                     element={
+                         <RequireAuth>
+                             <Home/>
+                         </RequireAuth>
+                     }
+              />
+          </Routes>
+      </UserContext.Provider>
   );
 }
 
