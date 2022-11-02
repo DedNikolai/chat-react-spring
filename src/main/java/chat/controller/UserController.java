@@ -2,6 +2,7 @@ package chat.controller;
 
 
 import chat.dto.LoginRequest;
+import chat.dto.UserResponse;
 import chat.model.User;
 import chat.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +28,8 @@ public class UserController {
 
   @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
   @GetMapping("users/current")
-  public ResponseEntity<User> getCurrentUser() {
-    ResponseEntity<User> response = ResponseEntity.ok(userService.getCurrentUser());
+  public ResponseEntity<UserResponse> getCurrentUser() {
+    ResponseEntity<UserResponse> response = ResponseEntity.ok(userService.getCurrentUser());
     return response;
   }
 

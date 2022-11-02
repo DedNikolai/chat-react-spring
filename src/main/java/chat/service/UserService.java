@@ -2,10 +2,12 @@ package chat.service;
 
 import chat.dto.JwtAuthenticationResponse;
 import chat.dto.LoginRequest;
+import chat.dto.UserResponse;
 import chat.model.User;
 import chat.repo.UserRepository;
 import chat.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,6 +22,7 @@ public class UserService {
   private final AuthenticationManager authenticationManager;
   private final PasswordEncoder passwordEncoder;
   private final JwtTokenProvider tokenProvider;
+  private final ModelMapper modelMapper;
 
   public JwtAuthenticationResponse authenticateUser(LoginRequest loginRequest) {
     UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
@@ -34,10 +37,10 @@ public class UserService {
   }
 
 
-  public User getCurrentUser() {
+  public UserResponse getCurrentUser() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     User user = userRepository.findByEmail(authentication.getName()).orElse(null);
-    return user;
+    return modelMapper.map(user, UserResponse.class);
   }
 
 

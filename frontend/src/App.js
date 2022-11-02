@@ -14,17 +14,19 @@ function App() {
     );
 
     useEffect(() => {
-        fetch('api/v1/users/current',{
-            method: 'GET',
-            headers: {
-                accept: 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-        }).then(res => {
-            res.json().then(res => {
-                setCurrentUser(res)
+        if (token) {
+            fetch('api/v1/users/current',{
+                method: 'GET',
+                headers: {
+                    accept: 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            }).then(res => {
+                res.json().then(res => {
+                    setCurrentUser(res)
+                })
             })
-        })
+        }
     }, [token]);
 
   return (

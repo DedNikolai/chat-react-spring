@@ -33,7 +33,6 @@ function Home() {
                 setMessages(res)
             });
             connect();
-            console.log('єффект');
             effectCalled.current = true;
         }
     }, []);
@@ -43,7 +42,6 @@ function Home() {
         let SockJS = require("sockjs-client");
         SockJS = new SockJS("http://localhost:8080/ws");
         stompClient = Stomp.over(SockJS);
-        console.log(auth.token)
         stompClient.connect({'X-Authorization': `token ${auth.token}`}, onConnected, onError);
     };
 
@@ -61,9 +59,7 @@ function Home() {
     };
 
     const onMessageReceived = (msg) => {
-        console.log('получно')
         let newMsg = JSON.parse(msg.body);
-        // console.log(newMsg)
         setMessages( arr => [...arr, newMsg]);
     };
 
